@@ -1,0 +1,71 @@
+name: EcoPartnerHub CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+    branches:
+      - main
+      - staging
+
+jobs:
+  validate-branch:
+    name: Validate Branch & PR Rules
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Enforce Branching Rules
+        shell: bash
+        run: |
+          TARGET_BRANCH="${{ github.base_ref }}"
+          SOURCE_BRANCH="${{ github.head_ref }}"
+
+          echo "Target Branch (Base): $TARGET_BRANCH"
+          echo "Source Branch (Head): $SOURCE_BRANCH"
+
+          # Rule 1: PRs into staging must originate from feature/<purpose> (or hotfix/<purpose>)
+          if [ "$TARGET_BRANCH" = "staging" ]; then
+            if [[ ! "$SOURCE_BRANCH" =~ ^feature/[a-zA-Z0-9._-]+$ ]] && [[ ! "$SOURCE_BRANCH" =~ ^hotfix/[a-zA-Z0-9._-]+$ ]]; then
+              echo "::error file=branch-rule::Branch naming violation! Branches merging into 'staging' MUST match 'feature/<purpose>' (e.g. feature/auth-flow). Received: '$SOURCE_BRANCH'"
+              exit 1
+            else
+              echo "✅ Source branch '$SOURCE_BRANCH' complies with naming policy (feature/<purpose>)."
+            fi
+          fi
+
+          # Rule 2: PRs into main must strictly originate from staging
+          if [ "$TARGET_BRANCH" = "main" ]; then
+            if [ "$SOURCE_BRANCH" != "staging" ] && [[ ! "$SOURCE_BRANCH" =~ ^hotfix/[a-zA-Z0-9._-]+$ ]]; then
+              echo "::error file=branch-rule::Direct merge violation! PRs to 'main' must originate from 'staging'. Direct feature branch merges into 'main' are strictly forbidden. Received: '$SOURCE_BRANCH'"
+              exit 1
+            else
+              echo "✅ PR origin verified: '$SOURCE_BRANCH' is authorized to merge into 'main'."
+            fi
+          fi
+
+  quality-checks:
+    name: Next.js Quality Gates (Types, Lint, Build)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: 1. TypeScript Verification
+        run: npm run type-check
+
+      - name: 2. ESLint Code Analysis
+        run: npm run lint
+
+      - name: 3. Next.js Production Build
+        run: npm run build
