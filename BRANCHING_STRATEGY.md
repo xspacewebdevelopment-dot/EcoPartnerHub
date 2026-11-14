@@ -167,3 +167,4 @@ Follow these exact steps in GitHub to make `main` untouchable and enforce approv
 - [x] PR template added in `.github/pull_request_template.md`
 - [x] Code owners file added in `.github/CODEOWNERS`
 - [ ] Apply Part A & Part B branch protection rules in GitHub Settings
+
