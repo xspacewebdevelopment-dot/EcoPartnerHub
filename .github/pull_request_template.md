@@ -22,3 +22,4 @@
 - [ ] Code follows project conventions and styling
 - [ ] No hardcoded secrets or environment variables committed
 - [ ] Tested locally and verified on Next.js dev server
+
