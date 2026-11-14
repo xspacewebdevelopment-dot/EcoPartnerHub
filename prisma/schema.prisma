@@ -10,3 +10,125 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  CUSTOMER
+  PROVIDER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+  DEACTIVATED
+}
+
+enum EntityType {
+  COMPANY
+  LLP
+  PARTNERSHIP
+  PROPRIETORSHIP
+  INDIVIDUAL_SPECIALIST
+  OTHER
+}
+
+model User {
+  id              String         @id @default(uuid())
+  email           String         @unique
+  phone           String?        @unique
+  passwordHash    String
+  role            Role           @default(CUSTOMER)
+  accountStatus   AccountStatus  @default(ACTIVE)
+  isEmailVerified Boolean        @default(false)
+  isPhoneVerified Boolean        @default(false)
+  tokenVersion    Int            @default(0) // increment on logout / password change to invalidate existing tokens
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  customerProfile     CustomerProfile?
+  providerProfile     ProviderProfile?
+  passwordResetTokens PasswordResetToken[]
+  auditLogs           AuditLog[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+}
+
+model CustomerProfile {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  fullName            String?
+  businessName        String?
+  businessType        String?  // e.g. D2C, Retailer, Manufacturer, Brand
+  city                String?
+  marketplacePresence String[] @default([]) // e.g. ["Amazon", "Flipkart"]
+  isBusinessVerified  Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ProviderProfile {
+  id                 String      @id @default(uuid())
+  userId             String      @unique
+  legalName          String
+  displayName        String
+  entityType         EntityType  @default(PROPRIETORSHIP)
+  operatingLocations String[]    @default([])
+  membershipStatus   String      @default("PENDING") // PENDING, ACTIVE, EXPIRED, CANCELLED
+  verificationLevel  Int         @default(0) // Level 0 to Level 4 (from Blueprint page 9)
+  verificationStatus String      @default("SUBMITTED") // SUBMITTED, UNDER_REVIEW, VERIFIED, REJECTED
+  website            String?
+  bio                String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+}
+
+model AdminInvite {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  role       Role     @default(ADMIN)
+  invitedBy  String
+  token      String   @unique
+  expiresAt  DateTime
+  isAccepted Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([token])
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  userId       String?
+  action       String   // e.g. "USER_LOGIN", "ACCOUNT_SUSPENDED", "PASSWORD_CHANGED"
+  actorId      String?  // ID of the user performing the action
+  targetEntity String?  // "User", "ProviderProfile", etc.
+  targetId     String?
+  ipAddress    String?
+  userAgent    String?
+  metadata     Json?
+  timestamp    DateTime @default(now())
+
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([action])
+  @@index([userId])
+}
