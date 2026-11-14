@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 via-white to-slate-100 text-slate-800 flex flex-col">
@@ -17,24 +19,93 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              CI/CD Pipeline Ready
-            </span>
+            <Link
+              href="/login"
+              className="text-xs font-semibold text-slate-700 hover:text-emerald-600 px-3 py-1.5 transition"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-3.5 py-1.5 rounded-lg shadow-xs transition"
+            >
+              Register
+            </Link>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-12 flex flex-col gap-12">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-12 flex flex-col gap-10">
         {/* Hero Section */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Week 1 Milestone: Authentication & Role Management Live
+          </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900">
             EcoPartnerHub <span className="text-emerald-600">Platform</span>
           </h1>
           <p className="text-lg text-slate-600 leading-relaxed">
             Collaborative, sustainable engineering workspace configured with multi-tier branch protection, automated quality gates, and Next.js production infrastructure.
           </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <Link
+              href="/login"
+              className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-sm transition"
+            >
+              Launch Login Console
+            </Link>
+            <Link
+              href="/register"
+              className="px-5 py-2.5 rounded-xl bg-white border border-slate-300 hover:border-emerald-500 text-slate-800 font-semibold text-sm shadow-xs transition"
+            >
+              Customer & Provider Registration
+            </Link>
+            <Link
+              href="/dashboard"
+              className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-100 font-semibold text-sm shadow-xs transition"
+            >
+              RBAC Live Test Console
+            </Link>
+          </div>
+        </div>
+
+        {/* Auth & RBAC Architecture Highlights */}
+        <div className="bg-white rounded-2xl p-6 border border-emerald-200 shadow-xs ring-1 ring-emerald-500/10">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">
+                Week 1 Backend Foundation & RBAC System (Akshay)
+              </h2>
+              <p className="text-xs text-slate-600 mt-0.5">
+                Full 4-role permission hierarchy with token revocation, password hashing, and Postman test verification suite.
+              </p>
+            </div>
+            <span className="text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-semibold">
+              23/23 API Tests Passed (100%)
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="font-bold text-emerald-800">CUSTOMER</div>
+              <div className="text-[11px] text-slate-500 mt-1">Free registration, enquiries, customer dashboard</div>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="font-bold text-blue-800">PROVIDER</div>
+              <div className="text-[11px] text-slate-500 mt-1">Verified logistics profile, provider dashboard</div>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="font-bold text-amber-800">ADMIN</div>
+              <div className="text-[11px] text-slate-500 mt-1">Operations dashboard, user moderation & suspend</div>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="font-bold text-purple-800">SUPER_ADMIN</div>
+              <div className="text-[11px] text-slate-500 mt-1">Controlled initial seed, create admins, platform audit</div>
+            </div>
+          </div>
         </div>
 
         {/* Workflow Diagram & Rules Grid */}
@@ -110,7 +181,7 @@ export default function Home() {
           <p className="text-sm text-slate-600 mb-6">
             Every pull request triggers GitHub Actions CI to execute test suites before approval:
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Gate 1</div>
               <div className="text-base font-bold text-slate-800">TypeScript Check</div>
@@ -120,13 +191,20 @@ export default function Home() {
             </div>
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Gate 2</div>
-              <div className="text-base font-bold text-slate-800">ESLint Code Quality</div>
+              <div className="text-base font-bold text-slate-800">ESLint Quality</div>
               <div className="mt-2 text-xs font-mono bg-white p-2 rounded border border-slate-200 text-slate-600">
                 npm run lint
               </div>
             </div>
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Gate 3</div>
+              <div className="text-base font-bold text-slate-800">Auth & RBAC Test</div>
+              <div className="mt-2 text-xs font-mono bg-white p-2 rounded border border-slate-200 text-slate-600">
+                npm run test:auth
+              </div>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Gate 4</div>
               <div className="text-base font-bold text-slate-800">Production Build</div>
               <div className="mt-2 text-xs font-mono bg-white p-2 rounded border border-slate-200 text-slate-600">
                 npm run build
@@ -141,9 +219,9 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <div>EcoPartnerHub © 2026. Configured for high-reliability team collaboration.</div>
           <div className="flex items-center gap-4">
-            <span>Branch Rules: Active</span>
+            <span>Branch: feature/akshay-auth-role-management</span>
             <span>•</span>
-            <span>Public Repository Free Tier</span>
+            <span>PR Target: staging</span>
           </div>
         </div>
       </footer>
