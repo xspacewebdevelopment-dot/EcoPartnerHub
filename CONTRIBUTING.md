@@ -83,3 +83,4 @@ Or run individual commands:
 4. Ensure the CI checks pass (green checkmark).
 5. Request review from the repository owner or team lead.
 6. Once approved, the branch will be merged into `staging`.
+
