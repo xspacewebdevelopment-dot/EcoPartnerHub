@@ -225,9 +225,12 @@ export default function LoginPage() {
                 </label>
               </div>
 
-              <div className="text-slate-500 hover:text-emerald-600 cursor-pointer">
+              <Link
+                href="/forgot-password"
+                className="text-slate-500 hover:text-emerald-600 hover:underline"
+              >
                 Forgot password?
-              </div>
+              </Link>
             </div>
 
             <div>
