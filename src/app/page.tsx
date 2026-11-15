@@ -77,7 +77,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900">
-                Week 1 Backend Foundation & RBAC System (Akshay)
+                Week 1 Backend Foundation & RBAC System
               </h2>
               <p className="text-xs text-slate-600 mt-0.5">
                 Full 4-role permission hierarchy with token revocation, password hashing, and Postman test verification suite.
@@ -219,7 +219,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <div>EcoPartnerHub © 2026. Configured for high-reliability team collaboration.</div>
           <div className="flex items-center gap-4">
-            <span>Branch: feature/akshay-auth-role-management</span>
+            <span>Branch: feature/auth-role-management</span>
             <span>•</span>
             <span>PR Target: staging</span>
           </div>

@@ -71,7 +71,7 @@ async function runTests() {
         email: testCustomerEmail,
         password,
         phone: testCustomerPhone,
-        fullName: "Test Customer Akshay",
+        fullName: "Test Customer User",
         businessName: "Eco Retail Hub Pvt",
         businessType: "E-commerce Retail",
         city: "Bengaluru",
@@ -299,13 +299,13 @@ async function runTests() {
       headers: { Authorization: `Bearer ${customerToken}` },
       body: {
         customerProfile: {
-          fullName: "Akshay Updated Fullname",
+          fullName: "Updated Test Fullname",
           city: "Bengaluru South",
         },
       },
     });
 
-    const pass = res.status === 200 && res.data?.user?.customerProfile?.fullName === "Akshay Updated Fullname";
+    const pass = res.status === 200 && res.data?.user?.customerProfile?.fullName === "Updated Test Fullname";
     recordResult("Update user information", "/api/user/me", "PATCH", 200, res.status, pass, res.data?.message || "");
   } catch (err) {
     recordResult("Update user information", "/api/user/me", "PATCH", 200, 500, false, err.message);
