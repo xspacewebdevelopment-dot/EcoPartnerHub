@@ -108,6 +108,12 @@ export default function DashboardPage() {
             <span className="text-xs text-slate-600 hidden sm:inline">
               Logged in: <strong className="text-slate-800">{userEmail}</strong>
             </span>
+            <Link
+              href="/verify"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition"
+            >
+              Verify Email / Phone
+            </Link>
             <button
               onClick={handleLogout}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition"
@@ -131,7 +137,19 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/verify"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition"
+            >
+              <span className={userInfo?.isEmailVerified ? "text-emerald-600 font-bold" : "text-amber-600"}>
+                {userInfo?.isEmailVerified ? "✓ Email Verified" : "⚠ Email Unverified"}
+              </span>
+              <span>•</span>
+              <span className={userInfo?.isPhoneVerified ? "text-emerald-600 font-bold" : "text-amber-600"}>
+                {userInfo?.isPhoneVerified ? "✓ Phone Verified" : "⚠ Phone Unverified"}
+              </span>
+            </Link>
             <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               JWT Active & Verified
