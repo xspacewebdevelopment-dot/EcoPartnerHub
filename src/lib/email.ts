@@ -16,13 +16,23 @@ async function getTransporter(): Promise<{
   transporter: Transporter;
   isEthereal: boolean;
 }> {
+  const service = process.env.SMTP_SERVICE; // "gmail", "yahoo", "outlook", etc.
   const host = process.env.SMTP_HOST;
   const port = parseInt(process.env.SMTP_PORT || "587", 10);
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
   const secure = process.env.SMTP_SECURE === "true" || port === 465;
 
-  // 1. If real SMTP credentials are provided, use them
+  // 1. If direct service name (like Gmail or Yahoo) is configured
+  if (service && user && pass) {
+    const transporter = nodemailer.createTransport({
+      service,
+      auth: { user, pass },
+    });
+    return { transporter, isEthereal: false };
+  }
+
+  // 2. If standard custom SMTP host credentials are provided, use them
   if (host && user && pass) {
     const transporter = nodemailer.createTransport({
       host,
