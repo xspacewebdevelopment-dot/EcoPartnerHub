@@ -1,37 +1,60 @@
-import nodemailer from "nodemailer";
+import nodemailer, { type Transporter } from "nodemailer";
 
-interface SendEmailResult {
+export interface SendEmailResult {
   success: boolean;
   messageId?: string;
+  previewUrl?: string | false;
   error?: string;
+  isEthereal?: boolean;
   simulated?: boolean;
 }
 
-/**
- * Creates and caches the Nodemailer transporter based on environment variables.
- */
-function getTransporter() {
+// Cached Ethereal transporter in dev mode to avoid re-creating test account on every request
+let cachedEtherealTransporter: Transporter | null = null;
+
+async function getTransporter(): Promise<{
+  transporter: Transporter;
+  isEthereal: boolean;
+}> {
   const host = process.env.SMTP_HOST;
   const port = parseInt(process.env.SMTP_PORT || "587", 10);
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
   const secure = process.env.SMTP_SECURE === "true" || port === 465;
 
+  // 1. If real SMTP credentials are provided, use them
   if (host && user && pass) {
-    return nodemailer.createTransport({
+    const transporter = nodemailer.createTransport({
       host,
       port,
       secure,
       auth: { user, pass },
     });
+    return { transporter, isEthereal: false };
   }
 
-  return null;
+  // 2. Otherwise, use an automated Ethereal Email test mailbox
+  if (cachedEtherealTransporter) {
+    return { transporter: cachedEtherealTransporter, isEthereal: true };
+  }
+
+  const testAccount = await nodemailer.createTestAccount();
+  cachedEtherealTransporter = nodemailer.createTransport({
+    host: testAccount.smtp.host,
+    port: testAccount.smtp.port,
+    secure: testAccount.smtp.secure,
+    auth: {
+      user: testAccount.user,
+      pass: testAccount.pass,
+    },
+  });
+
+  return { transporter: cachedEtherealTransporter, isEthereal: true };
 }
 
 /**
  * Sends a 6-digit password reset verification code to the target email address.
- * If SMTP credentials are not configured, logs to console for development testing.
+ * Delivers either via configured production SMTP or via Ethereal online test mailbox.
  */
 export async function sendPasswordResetEmail(
   toEmail: string,
@@ -110,31 +133,34 @@ export async function sendPasswordResetEmail(
   const text = `EcoPartnerHub Password Reset Code\n\nYour 6-digit password reset verification code is:\n\n${resetCode}\n\nThis code will expire in 15 minutes.\n\nIf you did not request this code, you can safely ignore this email.`;
 
   try {
-    const transporter = getTransporter();
+    const { transporter, isEthereal } = await getTransporter();
 
-    if (transporter) {
-      const info = await transporter.sendMail({
-        from,
-        to: toEmail,
-        subject,
-        text,
-        html,
-      });
+    const info = await transporter.sendMail({
+      from,
+      to: toEmail,
+      subject,
+      text,
+      html,
+    });
 
-      console.log(`[EMAIL SERVICE] Email sent successfully to ${toEmail}. MessageId: ${info.messageId}`);
-      return { success: true, messageId: info.messageId };
-    }
+    const previewUrl = isEthereal ? nodemailer.getTestMessageUrl(info) : undefined;
 
-    // Fallback in dev/testing mode when no SMTP server is configured
     console.log("================================================================================");
-    console.log(`[EMAIL SERVICE - DEV/TEST MODE]`);
+    console.log(`[EMAIL DISPATCH SUCCESS]`);
     console.log(`To: ${toEmail}`);
     console.log(`Subject: ${subject}`);
     console.log(`6-Digit Verification Code: [ ${resetCode} ]`);
-    console.log(`Valid for: 15 minutes`);
+    if (isEthereal && previewUrl) {
+      console.log(`Mailbox URL (Ethereal View): ${previewUrl}`);
+    }
     console.log("================================================================================");
 
-    return { success: true, simulated: true };
+    return {
+      success: true,
+      messageId: info.messageId,
+      previewUrl: previewUrl || undefined,
+      isEthereal,
+    };
   } catch (error) {
     console.error(`[EMAIL SERVICE ERROR] Failed to send email to ${toEmail}:`, error);
     return {

@@ -13,6 +13,7 @@ export default function ForgotPasswordPage() {
 
   // Step 2: Reset
   const [resetToken, setResetToken] = useState("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
@@ -45,6 +46,9 @@ export default function ForgotPasswordPage() {
       } else {
         if (data.resetToken) {
           setResetToken(data.resetToken);
+        }
+        if (data.previewUrl) {
+          setPreviewUrl(data.previewUrl);
         }
         setStep("reset");
       }
@@ -280,6 +284,28 @@ export default function ForgotPasswordPage() {
         {/* STEP 2: RESET PASSWORD */}
         {step === "reset" && (
           <div className="space-y-6">
+            {/* Live Mailbox Preview URL if available */}
+            {previewUrl && (
+              <div className="bg-sky-50 border border-sky-300 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div>
+                  <div className="font-bold text-sky-950 text-sm flex items-center gap-1.5">
+                    <span>📬</span> Live Mailbox Delivery
+                  </div>
+                  <div className="text-xs text-sky-800 mt-0.5">
+                    The verification email has been delivered to an online web mailbox.
+                  </div>
+                </div>
+                <a
+                  href={previewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-1 px-3.5 py-2 text-xs font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-700 shadow-xs transition shrink-0"
+                >
+                  Open Mailbox (View Email) ↗
+                </a>
+              </div>
+            )}
+
             {/* Token Info Banner if generated */}
             {resetToken && (
               <div className="bg-emerald-50 border border-emerald-300 p-4 rounded-xl space-y-2">

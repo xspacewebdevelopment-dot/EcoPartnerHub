@@ -73,6 +73,8 @@ export async function POST(req: NextRequest) {
       {
         success: true,
         message: `A 6-digit password reset code has been sent to ${user.email}.`,
+        // Mailbox web viewer URL if using Ethereal email
+        previewUrl: emailResult.previewUrl || null,
         // Providing resetToken in response for seamless API testing and Postman flows
         resetToken: token,
         expiresAt: expiresAt.toISOString(),
