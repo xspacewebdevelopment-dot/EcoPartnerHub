@@ -146,7 +146,7 @@ export default function ForgotPasswordPage() {
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            1. Request Token
+            1. Send 6-Digit Code
           </button>
           <button
             type="button"
@@ -157,7 +157,7 @@ export default function ForgotPasswordPage() {
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            2. Set New Password
+            2. Verify Code & Reset
           </button>
         </div>
 
@@ -248,7 +248,7 @@ export default function ForgotPasswordPage() {
                     />
                   </div>
                   <p className="mt-2 text-xs text-slate-500">
-                    We will generate a secure one-time cryptographic reset token valid for 1 hour.
+                    We will send a secure 6-digit numeric verification code to your email (valid for 15 minutes).
                   </p>
                 </div>
 
@@ -258,18 +258,18 @@ export default function ForgotPasswordPage() {
                     disabled={requestLoading}
                     className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 transition"
                   >
-                    {requestLoading ? "Generating token..." : "Generate Reset Token →"}
+                    {requestLoading ? "Sending verification code..." : "Send 6-Digit Code to Email →"}
                   </button>
                 </div>
 
                 <div className="text-center text-xs text-slate-500">
-                  Already have a reset token?{" "}
+                  Already received your 6-digit code?{" "}
                   <button
                     type="button"
                     onClick={() => setStep("reset")}
                     className="text-emerald-600 font-semibold hover:underline"
                   >
-                    Enter Token Directly
+                    Enter 6-Digit Code
                   </button>
                 </div>
               </form>
@@ -285,21 +285,21 @@ export default function ForgotPasswordPage() {
               <div className="bg-emerald-50 border border-emerald-300 p-4 rounded-xl space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-emerald-900 uppercase tracking-wide">
-                    Generated Reset Token (Dev & Testing)
+                    Sent to {email || "your email"}
                   </span>
                   <button
                     type="button"
                     onClick={copyTokenToClipboard}
                     className="text-xs px-2 py-1 rounded bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition"
                   >
-                    {tokenCopied ? "Copied!" : "Copy Token"}
+                    {tokenCopied ? "Copied!" : "Copy Code"}
                   </button>
                 </div>
-                <div className="p-2 bg-white rounded border border-emerald-200 font-mono text-[11px] text-slate-700 break-all select-all">
+                <div className="p-3 bg-white rounded border border-emerald-200 font-mono text-2xl font-black text-emerald-700 text-center tracking-[0.4em] select-all">
                   {resetToken}
                 </div>
                 <p className="text-[11px] text-emerald-800">
-                  ✓ Token has been automatically populated in the field below. Valid for 1 hour.
+                  ✓ The 6-digit code has been dispatched to your email and pre-filled below. Valid for 15 minutes.
                 </p>
               </div>
             )}
@@ -316,19 +316,23 @@ export default function ForgotPasswordPage() {
               <form className="space-y-5" onSubmit={handleResetPassword}>
                 <div>
                   <label htmlFor="token-input" className="block text-sm font-medium text-slate-700">
-                    Reset Token
+                    6-Digit Verification Code
                   </label>
                   <div className="mt-1">
                     <input
                       id="token-input"
                       type="text"
                       required
+                      maxLength={6}
                       value={resetToken}
                       onChange={(e) => setResetToken(e.target.value)}
-                      className="font-mono text-xs appearance-none block w-full px-3 py-2.5 border border-slate-300 rounded-lg shadow-xs placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                      placeholder="Paste 64-character hex token"
+                      className="font-mono text-lg tracking-[0.3em] text-center font-bold appearance-none block w-full px-3 py-2.5 border border-slate-300 rounded-lg shadow-xs placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      placeholder="••••••"
                     />
                   </div>
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    Enter the 6-digit code sent to your email.
+                  </p>
                 </div>
 
                 <div>

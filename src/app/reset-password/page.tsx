@@ -95,19 +95,23 @@ function ResetPasswordContent() {
       <form className="space-y-5" onSubmit={handleResetPassword}>
         <div>
           <label htmlFor="token-field" className="block text-sm font-medium text-slate-700">
-            Password Reset Token
+            6-Digit Verification Code
           </label>
           <div className="mt-1">
             <input
               id="token-field"
               type="text"
               required
+              maxLength={6}
               value={resetToken}
               onChange={(e) => setResetToken(e.target.value)}
-              className="font-mono text-xs appearance-none block w-full px-3 py-2.5 border border-slate-300 rounded-lg shadow-xs placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              placeholder="Paste reset token"
+              className="font-mono text-lg tracking-[0.3em] text-center font-bold appearance-none block w-full px-3 py-2.5 border border-slate-300 rounded-lg shadow-xs placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              placeholder="••••••"
             />
           </div>
+          <p className="mt-1 text-[11px] text-slate-500">
+            Enter the 6-digit code received on your email address.
+          </p>
         </div>
 
         <div>

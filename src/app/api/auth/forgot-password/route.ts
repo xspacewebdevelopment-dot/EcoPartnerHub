@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logAudit } from "@/lib/audit";
+import { sendPasswordResetEmail } from "@/lib/email";
 import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
@@ -41,9 +42,9 @@ export async function POST(req: NextRequest) {
       data: { used: true },
     });
 
-    // Generate secure random reset token
-    const token = crypto.randomBytes(32).toString("hex");
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour validity
+    // Generate secure 6-digit numeric reset code (100000 to 999999)
+    const token = crypto.randomInt(100000, 1000000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes validity
 
     await prisma.passwordResetToken.create({
       data: {
@@ -53,19 +54,25 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Send the 6-digit code to the user's email address
+    const emailResult = await sendPasswordResetEmail(user.email, token);
+
     await logAudit({
       action: "PASSWORD_RESET_REQUESTED",
       userId: user.id,
       targetEntity: "User",
       targetId: user.id,
-      metadata: { email: user.email },
+      metadata: {
+        email: user.email,
+        emailDelivered: emailResult.success,
+        isSimulated: emailResult.simulated || false,
+      },
     });
 
     return NextResponse.json(
       {
         success: true,
-        message:
-          "If an account exists with this email, a password reset token has been generated.",
+        message: `A 6-digit password reset code has been sent to ${user.email}.`,
         // Providing resetToken in response for seamless API testing and Postman flows
         resetToken: token,
         expiresAt: expiresAt.toISOString(),
