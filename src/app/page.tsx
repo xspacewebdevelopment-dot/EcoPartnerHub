@@ -39,10 +39,6 @@ export default function Home() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-12 flex flex-col gap-10">
         {/* Hero Section */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Week 1 Milestone: Authentication & Role Management Live
-          </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900">
             EcoPartnerHub <span className="text-emerald-600">Platform</span>
           </h1>
