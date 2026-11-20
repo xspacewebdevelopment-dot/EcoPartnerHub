@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
           providerId: user.id,
           displayName: user.providerProfile?.displayName || "Provider",
           verificationLevel: user.providerProfile?.verificationLevel ?? 0,
-          verificationStatus: user.providerProfile?.verificationStatus ?? "SUBMITTED",
+          verificationStatus: user.providerProfile?.verificationStatus ?? "PENDING",
           membershipStatus: user.providerProfile?.membershipStatus ?? "PENDING",
           leadsCount: 0,
           pendingEnquiriesCount: 0,

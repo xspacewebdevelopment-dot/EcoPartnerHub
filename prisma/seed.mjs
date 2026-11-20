@@ -1,4 +1,4 @@
-import { PrismaClient, Role, AccountStatus, EntityType } from "@prisma/client";
+import { PrismaClient, Role, AccountStatus, EntityType, VerificationStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -114,7 +114,7 @@ async function main() {
           operatingLocations: ["Mumbai", "Delhi NCR", "Bengaluru"],
           membershipStatus: "ACTIVE",
           verificationLevel: 2, // Level 2 — Business Verified
-          verificationStatus: "VERIFIED",
+          verificationStatus: VerificationStatus.APPROVED,
           website: "https://apexgrowth.example.com",
           bio: "Specializing in marketplace ads, catalogue optimization, and Quick Commerce operations.",
         },

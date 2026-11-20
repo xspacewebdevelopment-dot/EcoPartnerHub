@@ -1,0 +1,581 @@
+{
+  "collection": "EcoPartnerHub — Auth & Role Management",
+  "totalRequests": 28,
+  "requestsFailed": 0,
+  "totalTests": 69,
+  "testsPassed": 69,
+  "testsFailed": 0,
+  "totalTimeMs": 64742,
+  "failures": [],
+  "executions": [
+    {
+      "name": "Customer Registration [201]",
+      "status": "Created",
+      "code": 201,
+      "responseTime": 4893,
+      "assertions": [
+        {
+          "test": "Status code is 201",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Response indicates success",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "User role is CUSTOMER",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Token is returned",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Provider Registration [201]",
+      "status": "Created",
+      "code": 201,
+      "responseTime": 3485,
+      "assertions": [
+        {
+          "test": "Status code is 201",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Response indicates success",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "User role is PROVIDER",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Token is returned and saved",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Duplicate Email Validation [409]",
+      "status": "Conflict",
+      "code": 409,
+      "responseTime": 393,
+      "assertions": [
+        {
+          "test": "Status code is 409",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Response indicates failure",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Error mentions already exists",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Customer Login [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 1366,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "User role is CUSTOMER",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Token saved to customerToken",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Provider Login [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 1570,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "User role is PROVIDER",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Token saved to providerToken",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Admin Login [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 1346,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "User role is ADMIN",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Token saved to adminToken",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Super Admin Login [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 1405,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "User role is SUPER_ADMIN",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Token saved to superAdminToken",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Login - Incorrect Password [401]",
+      "status": "Unauthorized",
+      "code": 401,
+      "responseTime": 989,
+      "assertions": [
+        {
+          "test": "Status code is 401",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Error message is correct",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Access Without Token [401]",
+      "status": "Unauthorized",
+      "code": 401,
+      "responseTime": 129,
+      "assertions": [
+        {
+          "test": "Status code is 401",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Error mentions Unauthorized",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Customer Dashboard [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 1229,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Dashboard object is returned",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Provider Dashboard [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 956,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Dashboard object is returned",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Admin Dashboard [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 3621,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Stats object is returned",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Super Admin Dashboard [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 2514,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Platform overview object is returned",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Customer → Admin API [403]",
+      "status": "Forbidden",
+      "code": 403,
+      "responseTime": 938,
+      "assertions": [
+        {
+          "test": "Status code is 403",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Error mentions Forbidden",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Provider → Customer API [403]",
+      "status": "Forbidden",
+      "code": 403,
+      "responseTime": 1000,
+      "assertions": [
+        {
+          "test": "Status code is 403",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Error mentions Forbidden",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Get Current User (GET /api/user/me) [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 887,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "User email is a string",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "User role is CUSTOMER",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Update Profile (PATCH /api/user/me) [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 4383,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Message confirms success",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Get Account Status [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 1073,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Account status is ACTIVE",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Change Password [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 2091,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Message confirms success",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "New token is saved",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Super Admin Creates Admin [201]",
+      "status": "Created",
+      "code": 201,
+      "responseTime": 3295,
+      "assertions": [
+        {
+          "test": "Status code is 201",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Created admin has ADMIN role",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Admin List Users [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 2908,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Users array is returned",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Save a CUSTOMER user ID for subsequent tests",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Admin Suspend User [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 3844,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "User account status is SUSPENDED",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Admin Reactivate User [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 2180,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "User account status is ACTIVE",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Forgot Password [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 8555,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Response indicates success",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Reset token is saved",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Reset Password [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 3386,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Message confirms password reset",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Re-login After Password Change [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 1389,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Token saved to customerToken",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Logout [200]",
+      "status": "OK",
+      "code": 200,
+      "responseTime": 1896,
+      "assertions": [
+        {
+          "test": "Status code is 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Message confirms token invalidation",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "name": "Access After Logout [401]",
+      "status": "Unauthorized",
+      "code": 401,
+      "responseTime": 955,
+      "assertions": [
+        {
+          "test": "Status code is 401",
+          "passed": true,
+          "error": null
+        },
+        {
+          "test": "Error mentions revoked",
+          "passed": true,
+          "error": null
+        }
+      ]
+    }
+  ]
+}

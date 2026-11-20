@@ -44,12 +44,13 @@ export async function POST(req: NextRequest) {
 
     // Generate secure 6-digit numeric reset code (100000 to 999999)
     const token = crypto.randomInt(100000, 1000000).toString();
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes validity
 
     await prisma.passwordResetToken.create({
       data: {
         userId: user.id,
-        token,
+        token: tokenHash,
         expiresAt,
       },
     });

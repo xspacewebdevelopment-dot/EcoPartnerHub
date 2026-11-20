@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateRequest } from "@/lib/auth-guard";
-import { Role } from "@prisma/client";
+import { Role, VerificationStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
         prisma.user.count({ where: { role: Role.CUSTOMER } }),
         prisma.user.count({ where: { role: Role.PROVIDER } }),
         prisma.providerProfile.count({
-          where: { verificationStatus: "SUBMITTED" },
+          where: { verificationStatus: VerificationStatus.PENDING },
         }),
       ]);
 

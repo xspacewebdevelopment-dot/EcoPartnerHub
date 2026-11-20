@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { hashPassword, validatePasswordStrength } from "@/lib/password";
 import { signToken } from "@/lib/jwt";
 import { logAudit } from "@/lib/audit";
-import { Role, EntityType } from "@prisma/client";
+import { Role, EntityType, VerificationStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -88,6 +88,8 @@ export async function POST(req: NextRequest) {
     let resolvedEntityType: EntityType = EntityType.PROPRIETORSHIP;
     if (entityType && Object.values(EntityType).includes(entityType)) {
       resolvedEntityType = entityType as EntityType;
+    } else if (entityType === "PRIVATE_LIMITED" || entityType === "PVT_LTD") {
+      resolvedEntityType = EntityType.COMPANY;
     }
 
     // 6. Hash password and create provider
@@ -112,7 +114,7 @@ export async function POST(req: NextRequest) {
             bio: bio || null,
             membershipStatus: "PENDING",
             verificationLevel: 0, // Level 0 — Submitted (as per Blueprint)
-            verificationStatus: "SUBMITTED",
+            verificationStatus: VerificationStatus.PENDING,
           },
         },
       },

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, validatePasswordStrength } from "@/lib/password";
 import { logAudit } from "@/lib/audit";
+import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
 
@@ -26,9 +27,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Find and validate the reset token
-    const resetRecord = await prisma.passwordResetToken.findUnique({
-      where: { token },
+    // 2. Find and validate the reset token (hashed or raw for backward compatibility)
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const resetRecord = await prisma.passwordResetToken.findFirst({
+      where: {
+        OR: [
+          { token: tokenHash },
+          { token: token },
+        ],
+      },
       include: { user: true },
     });
 
