@@ -122,10 +122,28 @@ async function runTests() {
       },
     });
 
-    const pass = res.status === 409;
+    const pass = res.status === 409 && res.data?.success === false && res.data?.error?.includes("already exists");
     recordResult("Duplicate email", "/api/auth/register/customer", "POST", 409, res.status, pass, res.data?.error || "");
   } catch (err) {
     recordResult("Duplicate email", "/api/auth/register/customer", "POST", 409, 500, false, err.message);
+  }
+
+  // 3b. Provider duplicate email validation - cross-role duplicate email blocked (409 Conflict)
+  try {
+    const res = await request("/api/auth/register/provider", {
+      method: "POST",
+      body: {
+        email: testCustomerEmail,
+        password,
+        legalName: "Duplicate Provider LLC",
+        displayName: "Dup Provider",
+      },
+    });
+
+    const pass = res.status === 409 && res.data?.success === false && res.data?.error?.includes("already exists");
+    recordResult("Provider duplicate email blocked", "/api/auth/register/provider", "POST", 409, res.status, pass, res.data?.error || "");
+  } catch (err) {
+    recordResult("Provider duplicate email blocked", "/api/auth/register/provider", "POST", 409, 500, false, err.message);
   }
 
   // 4. Correct login (200 OK)
@@ -157,7 +175,10 @@ async function runTests() {
       },
     });
 
-    const pass = res.status === 401;
+    const pass =
+      res.status === 401 &&
+      res.data?.success === false &&
+      (res.data?.error === "Invalid email or password" || res.data?.message === "Invalid email or password");
     recordResult("Incorrect password", "/api/auth/login", "POST", 401, res.status, pass, res.data?.error || "");
   } catch (err) {
     recordResult("Incorrect password", "/api/auth/login", "POST", 401, 500, false, err.message);
@@ -182,7 +203,10 @@ async function runTests() {
       method: "GET",
     });
 
-    const pass = res.status === 401;
+    const pass =
+      res.status === 401 &&
+      res.data?.success === false &&
+      Boolean(res.data?.error?.toLowerCase().includes("unauthorized"));
     recordResult("Access without token", "/api/user/me", "GET", 401, res.status, pass, res.data?.error || "");
   } catch (err) {
     recordResult("Access without token", "/api/user/me", "GET", 401, 500, false, err.message);
@@ -424,7 +448,10 @@ async function runTests() {
       headers: { Authorization: `Bearer ${newPasswordToken}` },
     });
 
-    const pass = res.status === 401;
+    const pass =
+      res.status === 401 &&
+      res.data?.success === false &&
+      Boolean(res.data?.error?.toLowerCase().includes("revoked"));
     recordResult("Access after logout revoked", "/api/user/me", "GET", 401, res.status, pass, res.data?.error || "");
   } catch (err) {
     recordResult("Access after logout revoked", "/api/user/me", "GET", 401, 500, false, err.message);

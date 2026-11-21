@@ -48,8 +48,13 @@ export async function POST(req: NextRequest) {
 
     // 3. Duplicate email check (409 Conflict)
     const normalizedEmail = email.toLowerCase().trim();
-    const existingEmail = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
+    const existingEmail = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: "insensitive",
+        },
+      },
     });
 
     if (existingEmail) {
@@ -57,6 +62,8 @@ export async function POST(req: NextRequest) {
         {
           success: false,
           error: "An account with this email address already exists",
+          message: "An account with this email address already exists",
+          statusCode: 409,
         },
         { status: 409 }
       );
@@ -65,8 +72,13 @@ export async function POST(req: NextRequest) {
     // 4. Duplicate phone check (409 Conflict if phone provided)
     if (phone) {
       const normalizedPhone = phone.trim();
-      const existingPhone = await prisma.user.findUnique({
-        where: { phone: normalizedPhone },
+      const existingPhone = await prisma.user.findFirst({
+        where: {
+          phone: {
+            equals: normalizedPhone,
+            mode: "insensitive",
+          },
+        },
       });
 
       if (existingPhone) {
@@ -74,6 +86,8 @@ export async function POST(req: NextRequest) {
           {
             success: false,
             error: "An account with this phone number already exists",
+            message: "An account with this phone number already exists",
+            statusCode: 409,
           },
           { status: 409 }
         );
@@ -144,8 +158,30 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     console.error("Customer registration error:", error);
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "P2002"
+    ) {
+      const target = (error as { meta?: { target?: string[] } }).meta?.target;
+      const isPhone = Array.isArray(target) && target.includes("phone");
+      return NextResponse.json(
+        {
+          success: false,
+          error: isPhone
+            ? "An account with this phone number already exists"
+            : "An account with this email address already exists",
+          message: isPhone
+            ? "An account with this phone number already exists"
+            : "An account with this email address already exists",
+          statusCode: 409,
+        },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
-      { success: false, error: "Internal server error during registration" },
+      { success: false, error: "Internal server error during registration", message: "Internal server error during registration" },
       { status: 500 }
     );
   }

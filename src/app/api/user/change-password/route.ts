@@ -39,7 +39,12 @@ export async function POST(req: NextRequest) {
     );
     if (!isCurrentValid) {
       return NextResponse.json(
-        { success: false, error: "Incorrect current password" },
+        {
+          success: false,
+          error: "Incorrect current password",
+          message: "Incorrect current password",
+          statusCode: 401,
+        },
         { status: 401 }
       );
     }

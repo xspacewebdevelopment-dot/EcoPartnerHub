@@ -80,7 +80,11 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        setError(data.error || "Registration failed. Please check the form fields.");
+        if (res.status === 409) {
+          setError("An account with this email address already exists. Duplicate email registration is not allowed.");
+        } else {
+          setError(data.error || data.message || "Registration failed. Please check the form fields.");
+        }
       } else {
         setSuccess(`Registration successful as ${data.user.role}! Token issued.`);
         if (data.token) {
@@ -158,8 +162,16 @@ export default function RegisterPage() {
 
         {/* Error Alert */}
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md flex items-center justify-between gap-3">
             <p className="text-sm font-medium text-red-800">{error}</p>
+            {(error.includes("already exists") || error.includes("Duplicate email")) && (
+              <Link
+                href="/login"
+                className="shrink-0 text-xs font-bold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-3 py-1.5 rounded-lg transition"
+              >
+                Sign in now →
+              </Link>
+            )}
           </div>
         )}
 

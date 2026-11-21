@@ -38,8 +38,13 @@ export async function POST(req: NextRequest) {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-    const existing = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
+    const existing = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: "insensitive",
+        },
+      },
     });
 
     if (existing) {
@@ -47,6 +52,8 @@ export async function POST(req: NextRequest) {
         {
           success: false,
           error: "An account with this email address already exists",
+          message: "An account with this email address already exists",
+          statusCode: 409,
         },
         { status: 409 }
       );
@@ -90,8 +97,24 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     console.error("Create admin error:", error);
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "P2002"
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "An account with this email address already exists",
+          message: "An account with this email address already exists",
+          statusCode: 409,
+        },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: "Internal server error", message: "Internal server error" },
       { status: 500 }
     );
   }

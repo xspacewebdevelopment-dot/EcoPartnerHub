@@ -31,7 +31,12 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: "Invalid email or password" },
+        {
+          success: false,
+          error: "Invalid email or password",
+          message: "Invalid email or password",
+          statusCode: 401,
+        },
         { status: 401 }
       );
     }
@@ -42,6 +47,8 @@ export async function POST(req: NextRequest) {
         {
           success: false,
           error: "Account has been suspended. Please contact platform support.",
+          message: "Account has been suspended. Please contact platform support.",
+          statusCode: 403,
         },
         { status: 403 }
       );
@@ -51,7 +58,12 @@ export async function POST(req: NextRequest) {
     const isPasswordValid = await comparePassword(password, user.passwordHash);
     if (!isPasswordValid) {
       return NextResponse.json(
-        { success: false, error: "Invalid email or password" },
+        {
+          success: false,
+          error: "Invalid email or password",
+          message: "Invalid email or password",
+          statusCode: 401,
+        },
         { status: 401 }
       );
     }
