@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { authenticateRequest } from "@/lib/auth-guard";
 import { sendVerificationSms } from "@/lib/sms";
 import { logAudit } from "@/lib/audit";
+import { checkResendRateLimit } from "@/lib/otp-rate-limit";
 import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
@@ -70,6 +71,15 @@ export async function POST(req: NextRequest) {
         where: { id: user.id },
         data: { phone: phone.trim(), isPhoneVerified: false },
       });
+    }
+
+    // ── Rate Limit: 60s cooldown + max 5 resends per hour ──
+    const rateLimitResponse = await checkResendRateLimit(
+      user.id,
+      `VERIFY_PHONE_${user.id}_`
+    );
+    if (rateLimitResponse) {
+      return rateLimitResponse;
     }
 
     // 3. Invalidate previous unused phone verification tokens for this user

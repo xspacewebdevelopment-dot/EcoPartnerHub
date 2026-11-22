@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { authenticateRequest } from "@/lib/auth-guard";
 import { logAudit } from "@/lib/audit";
+import { handleFailedOtpAttempt } from "@/lib/otp-rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -49,38 +50,42 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const tokenString = `VERIFY_PHONE_${user.id}_${code.trim()}`;
-
-    // 3. Find active token
-    const tokenRecord = await prisma.passwordResetToken.findUnique({
-      where: { token: tokenString },
+    // 3. Find the most recent active (unused, non-expired) phone verification token
+    const activeToken = await prisma.passwordResetToken.findFirst({
+      where: {
+        userId: user.id,
+        token: { startsWith: `VERIFY_PHONE_${user.id}_` },
+        used: false,
+        expiresAt: { gte: new Date() },
+      },
+      orderBy: { createdAt: "desc" },
     });
 
-    if (!tokenRecord || tokenRecord.used || tokenRecord.userId !== user.id) {
-      return NextResponse.json(
-        { success: false, error: "Invalid or already used verification code" },
-        { status: 400 }
-      );
-    }
-
-    if (new Date() > tokenRecord.expiresAt) {
+    if (!activeToken) {
       return NextResponse.json(
         {
           success: false,
-          error: "Verification code has expired. Please request a new code.",
+          error: "No active verification code found. Please request a new one.",
         },
         { status: 400 }
       );
     }
 
-    // 4. Update user and invalidate code in a transaction
+    // ── Failed attempt lockout check ──
+    const expectedTokenString = `VERIFY_PHONE_${user.id}_${code.trim()}`;
+    if (activeToken.token !== expectedTokenString) {
+      // Wrong code — increment failed attempts (locks after 3)
+      return handleFailedOtpAttempt(activeToken.id, activeToken.failedAttempts);
+    }
+
+    // 4. Correct code — update user and invalidate code in a transaction
     await prisma.$transaction([
       prisma.user.update({
         where: { id: user.id },
         data: { isPhoneVerified: true },
       }),
       prisma.passwordResetToken.update({
-        where: { id: tokenRecord.id },
+        where: { id: activeToken.id },
         data: { used: true },
       }),
     ]);

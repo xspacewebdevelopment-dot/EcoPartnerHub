@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logAudit } from "@/lib/audit";
 import { sendPasswordResetEmail } from "@/lib/email";
+import { checkResendRateLimit } from "@/lib/otp-rate-limit";
 import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,12 @@ export async function POST(req: NextRequest) {
         },
         { status: 200 }
       );
+    }
+
+    // ── Rate Limit: 60s cooldown + max 5 resends per hour ──
+    const rateLimitResponse = await checkResendRateLimit(user.id);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
     }
 
     // Invalidate previous unused reset tokens for this user

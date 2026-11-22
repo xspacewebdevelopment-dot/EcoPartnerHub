@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { authenticateRequest } from "@/lib/auth-guard";
 import { sendEmailVerificationEmail } from "@/lib/email";
 import { logAudit } from "@/lib/audit";
+import { checkResendRateLimit } from "@/lib/otp-rate-limit";
 import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
@@ -53,6 +54,15 @@ export async function POST(req: NextRequest) {
         },
         { status: 200 }
       );
+    }
+
+    // ── Rate Limit: 60s cooldown + max 5 resends per hour ──
+    const rateLimitResponse = await checkResendRateLimit(
+      user.id,
+      `VERIFY_EMAIL_${user.id}_`
+    );
+    if (rateLimitResponse) {
+      return rateLimitResponse;
     }
 
     // 3. Invalidate previous unused email verification tokens for this user
