@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,3 +7,418 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                  String                @id @default(uuid())
+  email               String                @unique
+  phone               String?               @unique
+  passwordHash        String
+  role                Role                  @default(CUSTOMER)
+  accountStatus       AccountStatus         @default(ACTIVE)
+  isEmailVerified     Boolean               @default(false)
+  isPhoneVerified     Boolean               @default(false)
+  tokenVersion        Int                   @default(0)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  AdminPermission     AdminPermission[]
+  auditLogs           AuditLog[]
+  customerProfile     CustomerProfile?
+  Enquiry             Enquiry[]
+  passwordResetTokens PasswordResetToken[]
+  ProjectOrder        ProjectOrder[]
+  providerProfile     ProviderProfile?
+  Quotation           Quotation[]
+  VerificationHistory VerificationHistory[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+  @@index([accountStatus])
+}
+
+model CustomerProfile {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  fullName            String?
+  businessName        String?
+  businessType        String?
+  city                String?
+  marketplacePresence String[] @default([])
+  isBusinessVerified  Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  country             String?  @default("India")
+  gstin               String?
+  phone               String?
+  pincode             String?
+  state               String?
+  website             String?
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model ProviderProfile {
+  id                      String                   @id @default(uuid())
+  userId                  String                   @unique
+  legalName               String
+  displayName             String
+  entityType              EntityType               @default(PROPRIETORSHIP)
+  operatingLocations      String[]                 @default([])
+  membershipStatus        String                   @default("PENDING")
+  verificationLevel       Int                      @default(0)
+  website                 String?
+  bio                     String?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  businessCategory        String?
+  description             String?
+  onboardedAt             DateTime?
+  subscriptionTier        String?
+  verificationStatus      VerificationStatus       @default(PENDING)
+  serviceCategories       String[]                 @default([])
+  ProjectOrder            ProjectOrder[]
+  user                    User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ProviderResponse        ProviderResponse[]
+  Quotation               Quotation[]
+  VerificationApplication VerificationApplication?
+  VerificationHistory     VerificationHistory[]
+
+  @@index([userId])
+  @@index([verificationLevel])
+  @@index([verificationStatus])
+}
+
+model PasswordResetToken {
+  id             String   @id @default(uuid())
+  userId         String
+  token          String   @unique
+  expiresAt      DateTime
+  used           Boolean  @default(false)
+  failedAttempts Int      @default(0)
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId, createdAt])
+}
+
+model AdminInvite {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  role       Role     @default(ADMIN)
+  invitedBy  String
+  token      String   @unique
+  expiresAt  DateTime
+  isAccepted Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([token])
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  userId       String?
+  action       String
+  actorId      String?
+  targetEntity String?
+  targetId     String?
+  ipAddress    String?
+  userAgent    String?
+  metadata     Json?
+  timestamp    DateTime @default(now())
+  afterState   Json?
+  beforeState  Json?
+  createdAt    DateTime @default(now())
+  user         User?    @relation(fields: [userId], references: [id])
+
+  @@index([action])
+  @@index([userId])
+}
+
+model AdminPermission {
+  id             String              @id
+  adminId        String
+  permissionType AdminPermissionType
+  grantedById    String?
+  grantedAt      DateTime            @default(now())
+  revokedAt      DateTime?
+  isActive       Boolean             @default(true)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime
+  User           User                @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@unique([adminId, permissionType])
+  @@index([adminId])
+  @@index([isActive])
+}
+
+model Enquiry {
+  id                   String                 @id
+  customerId           String
+  subject              String?
+  message              String?
+  status               EnquiryStatus          @default(OPEN)
+  resolvedAt           DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime
+  budgetMax            Float?
+  budgetMin            Float?
+  currency             String                 @default("INR")
+  description          String                 @default("")
+  enquiryNumber        String?                @unique
+  location             String?
+  metadata             Json?
+  minProviderLevel     Int                    @default(0)
+  serviceCategory      String                 @default("ACCOUNT_MANAGEMENT")
+  targetMarketplaces   String[]               @default([])
+  timeline             String?
+  title                String                 @default("Service Enquiry")
+  User                 User                   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  EnquiryStatusHistory EnquiryStatusHistory[]
+  ProjectOrder         ProjectOrder[]
+  ProviderResponse     ProviderResponse[]
+  Quotation            Quotation[]
+
+  @@index([createdAt])
+  @@index([customerId])
+  @@index([serviceCategory])
+  @@index([status])
+}
+
+model EnquiryStatusHistory {
+  id             String         @id
+  enquiryId      String
+  previousStatus EnquiryStatus?
+  newStatus      EnquiryStatus
+  changedBy      String
+  changeReason   String?
+  metadata       Json?
+  timestamp      DateTime       @default(now())
+  Enquiry        Enquiry        @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+
+  @@index([enquiryId])
+  @@index([timestamp])
+}
+
+model ProjectOrder {
+  id                   String             @id
+  orderNumber          String             @unique
+  enquiryId            String
+  quotationId          String?            @unique
+  customerId           String
+  providerId           String
+  title                String
+  totalAmount          Float
+  currency             String             @default("INR")
+  status               ProjectOrderStatus @default(INITIATED)
+  startDate            DateTime           @default(now())
+  targetCompletionDate DateTime?
+  actualCompletionDate DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime
+  User                 User               @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  Enquiry              Enquiry            @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  ProviderProfile      ProviderProfile    @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  Quotation            Quotation?         @relation(fields: [quotationId], references: [id])
+
+  @@index([customerId])
+  @@index([enquiryId])
+  @@index([providerId])
+  @@index([status])
+}
+
+model ProviderDocument {
+  id                      String                  @id
+  applicationId           String
+  documentType            DocumentType
+  secureStorageKey        String
+  maskedMetadata          Json?
+  expiryDate              DateTime?
+  uploadedAt              DateTime                @default(now())
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime
+  VerificationApplication VerificationApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+  @@index([documentType])
+}
+
+model ProviderResponse {
+  id                String                 @id
+  enquiryId         String
+  providerId        String
+  message           String
+  proposedBudget    Float?
+  estimatedDuration String?
+  status            ProviderResponseStatus @default(SUBMITTED)
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime
+  Enquiry           Enquiry                @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  ProviderProfile   ProviderProfile        @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([enquiryId, providerId])
+  @@index([enquiryId])
+  @@index([providerId])
+  @@index([status])
+}
+
+model Quotation {
+  id                 String          @id
+  quotationNumber    String          @unique
+  enquiryId          String
+  providerId         String
+  customerId         String
+  title              String
+  scopeOfWork        String
+  items              Json
+  subtotal           Float
+  taxRate            Float           @default(18.0)
+  taxAmount          Float           @default(0)
+  discountAmount     Float           @default(0)
+  totalAmount        Float
+  currency           String          @default("INR")
+  validUntil         DateTime?
+  paymentTerms       String?
+  termsAndConditions String?
+  status             QuotationStatus @default(SENT)
+  rejectionReason    String?
+  acceptedAt         DateTime?
+  rejectedAt         DateTime?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime
+  ProjectOrder       ProjectOrder?
+  User               User            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  Enquiry            Enquiry         @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  ProviderProfile    ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([enquiryId])
+  @@index([providerId])
+  @@index([status])
+}
+
+model VerificationApplication {
+  id                  String                @id
+  providerId          String                @unique
+  status              VerificationStatus    @default(PENDING)
+  reviewerId          String?
+  rejectionReason     String?
+  adminNote           String?
+  submittedAt         DateTime              @default(now())
+  reviewedAt          DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime
+  ProviderDocument    ProviderDocument[]
+  ProviderProfile     ProviderProfile       @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  VerificationHistory VerificationHistory[]
+
+  @@index([providerId])
+  @@index([status])
+}
+
+model VerificationHistory {
+  id                      String                  @id
+  applicationId           String
+  providerId              String
+  actorId                 String
+  previousStatus          VerificationStatus?
+  newStatus               VerificationStatus
+  reasonOrNote            String?
+  createdAt               DateTime                @default(now())
+  User                    User                    @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  VerificationApplication VerificationApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  ProviderProfile         ProviderProfile         @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([actorId])
+  @@index([applicationId])
+  @@index([providerId])
+}
+
+enum Role {
+  CUSTOMER
+  PROVIDER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+  DEACTIVATED
+  RESTRICTED
+}
+
+enum EntityType {
+  COMPANY
+  LLP
+  PARTNERSHIP
+  PROPRIETORSHIP
+  INDIVIDUAL_SPECIALIST
+  OTHER
+}
+
+enum AdminPermissionType {
+  VERIFICATION_EXECUTIVE
+  LEAD_OPERATIONS_EXECUTIVE
+  SUPPORT_AGENT
+  CONTENT_MODERATOR
+  BILLING_MANAGER
+}
+
+enum DocumentType {
+  BUSINESS_LICENSE
+  TAX_CERTIFICATE
+  IDENTITY_PROOF
+  ADDRESS_PROOF
+  PROFESSIONAL_CERTIFICATION
+  INSURANCE_CERTIFICATE
+  OTHER
+}
+
+enum EnquiryStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  DRAFT
+  LEAD_MATCHED
+  QUOTED
+  ACCEPTED
+  COMPLETED
+  CANCELLED
+  IN_DISCUSSION
+}
+
+enum ProjectOrderStatus {
+  INITIATED
+  IN_PROGRESS
+  MILESTONE_DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+enum ProviderResponseStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  SHORTLISTED
+  QUOTED
+  DECLINED
+  WITHDRAWN
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  WITHDRAWN
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  INFO_REQUESTED
+}

@@ -1,0 +1,1210 @@
+{
+	"info": {
+		"_postman_id": "eco-partner-hub-auth-collection",
+		"name": "EcoPartnerHub — Auth & Role Management",
+		"description": "Complete Week 1 API Collection for EcoPartnerHub — Authentication, Registration, Role-Based Access Control, and User Management. Stack: Next.js 16 (App Router), Prisma ORM, Neon PostgreSQL, JWT, BcryptJS.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Registration & Validation",
+			"item": [
+				{
+					"name": "Customer Registration [201]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response indicates success', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});",
+									"",
+									"pm.test('User role is CUSTOMER', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.role).to.eql('CUSTOMER');",
+									"});",
+									"",
+									"pm.test('Token is returned', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.token).to.be.a('string');",
+									"    pm.environment.set('customerToken', jsonData.token);",
+									"    pm.environment.set('currentCustomerId', jsonData.user.id);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"ecocustomer_{{$timestamp}}@example.com\",\n  \"password\": \"SecureCustomer@2026!\",\n  \"phone\": \"+9191000{{$randomInt}}\",\n  \"fullName\": \"Test Customer User\",\n  \"businessName\": \"EcoRetail Solutions\",\n  \"businessType\": \"E-commerce Retailer\",\n  \"city\": \"Bengaluru\",\n  \"marketplacePresence\": [\"Amazon India\", \"Flipkart\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register/customer",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register", "customer"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider Registration [201]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Response indicates success', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});",
+									"",
+									"pm.test('User role is PROVIDER', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.role).to.eql('PROVIDER');",
+									"});",
+									"",
+									"pm.test('Token is returned and saved', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.token).to.be.a('string');",
+									"    pm.environment.set('providerToken', jsonData.token);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"ecoprovider_{{$timestamp}}@example.com\",\n  \"password\": \"SecureProvider@2026!\",\n  \"phone\": \"+9192000{{$randomInt}}\",\n  \"legalName\": \"Green Logistics Pvt Ltd\",\n  \"displayName\": \"GreenLogix Expedited\",\n  \"entityType\": \"PRIVATE_LIMITED\",\n  \"operatingLocations\": [\"Mumbai\", \"Pune\", \"Ahmedabad\"],\n  \"website\": \"https://greenlogix.example.com\",\n  \"bio\": \"Eco-friendly fulfillment and carbon-neutral last-mile delivery services.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register/provider",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register", "provider"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Duplicate Email Validation [409]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 409', function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"",
+									"pm.test('Response indicates failure', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(false);",
+									"});",
+									"",
+									"pm.test('Error mentions already exists', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include('already exists');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"customer@ecopartnerhub.com\",\n  \"password\": \"Customer@2026\",\n  \"fullName\": \"Duplicate User\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/register/customer",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "register", "customer"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Login & Authentication",
+			"item": [
+				{
+					"name": "Customer Login [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('User role is CUSTOMER', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.role).to.eql('CUSTOMER');",
+									"});",
+									"",
+									"pm.test('Token saved to customerToken', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.token).to.be.a('string');",
+									"    pm.environment.set('customerToken', jsonData.token);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"customer@ecopartnerhub.com\",\n  \"password\": \"Customer@2026\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider Login [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('User role is PROVIDER', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.role).to.eql('PROVIDER');",
+									"});",
+									"",
+									"pm.test('Token saved to providerToken', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.token).to.be.a('string');",
+									"    pm.environment.set('providerToken', jsonData.token);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"provider@ecopartnerhub.com\",\n  \"password\": \"Provider@2026\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Login [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('User role is ADMIN', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.role).to.eql('ADMIN');",
+									"});",
+									"",
+									"pm.test('Token saved to adminToken', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.token).to.be.a('string');",
+									"    pm.environment.set('adminToken', jsonData.token);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@ecopartnerhub.com\",\n  \"password\": \"AdminUser@2026\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Super Admin Login [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('User role is SUPER_ADMIN', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.role).to.eql('SUPER_ADMIN');",
+									"});",
+									"",
+									"pm.test('Token saved to superAdminToken', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.token).to.be.a('string');",
+									"    pm.environment.set('superAdminToken', jsonData.token);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"superadmin@ecopartnerhub.com\",\n  \"password\": \"SuperAdmin@2026\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Incorrect Password [401]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 401', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test('Error message is correct', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.eql('Invalid email or password');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"customer@ecopartnerhub.com\",\n  \"password\": \"WrongPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Access Without Token [401]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 401', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test('Error mentions Unauthorized', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include('unauthorized');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/user/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "user", "me"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Role-Based Access Control",
+			"item": [
+				{
+					"name": "Customer Dashboard [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Dashboard object is returned', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.dashboard).to.be.an('object');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/customer/dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "customer", "dashboard"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider Dashboard [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Dashboard object is returned', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.dashboard).to.be.an('object');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{providerToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/provider/dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "provider", "dashboard"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Dashboard [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Stats object is returned', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.stats).to.be.an('object');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "dashboard"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Super Admin Dashboard [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Platform overview object is returned', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.platformOverview).to.be.an('object');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{superAdminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/super-admin/dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "super-admin", "dashboard"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Customer → Admin API [403]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 403', function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"pm.test('Error mentions Forbidden', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include('forbidden');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "dashboard"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Provider → Customer API [403]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 403', function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"pm.test('Error mentions Forbidden', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include('forbidden');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{providerToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/customer/dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "customer", "dashboard"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. User Profile & Account Management",
+			"item": [
+				{
+					"name": "Get Current User (GET /api/user/me) [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('User email is a string', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.email).to.be.a('string');",
+									"});",
+									"",
+									"pm.test('User role is CUSTOMER', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.role).to.eql('CUSTOMER');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/user/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "user", "me"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile (PATCH /api/user/me) [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Message confirms success', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message.toLowerCase()).to.include('successfully');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerProfile\": {\n    \"fullName\": \"Updated Test User\",\n    \"businessName\": \"EcoRetail Solutions Pvt Ltd\",\n    \"city\": \"Bengaluru, Karnataka\",\n    \"marketplacePresence\": [\"Amazon India\", \"Flipkart\", \"Myntra\"]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/user/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "user", "me"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Account Status [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Account status is ACTIVE', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status.accountStatus).to.eql('ACTIVE');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/user/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "user", "status"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Message confirms success', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message.toLowerCase()).to.include('successfully');",
+									"});",
+									"",
+									"pm.test('New token is saved', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.token).to.be.a('string');",
+									"    pm.environment.set('customerToken', jsonData.token);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"Customer@2026\",\n  \"newPassword\": \"NewCustomer@2026!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/user/change-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "user", "change-password"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Admin User Management",
+			"item": [
+				{
+					"name": "Super Admin Creates Admin [201]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('Created admin has ADMIN role', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.admin.role).to.eql('ADMIN');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{superAdminToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"ops_admin_{{$timestamp}}@ecopartnerhub.com\",\n  \"password\": \"OpsAdmin@2026!\",\n  \"phone\": \"+9197000{{$randomInt}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/super-admin/admins",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "super-admin", "admins"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin List Users [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Users array is returned', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.users).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('Save a CUSTOMER user ID for subsequent tests', function () {",
+									"    var jsonData = pm.response.json();",
+									"    var customers = jsonData.users.filter(function(u) { return u.role === 'CUSTOMER'; });",
+									"    if (customers.length > 0) {",
+									"        pm.environment.set('targetUserId', customers[0].id);",
+									"    }",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/users",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "users"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Suspend User [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('User account status is SUSPENDED', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.accountStatus).to.eql('SUSPENDED');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"SUSPENDED\",\n  \"reason\": \"Compliance verification pending\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/users/{{targetUserId}}/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "users", "{{targetUserId}}", "status"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Reactivate User [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('User account status is ACTIVE', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.accountStatus).to.eql('ACTIVE');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{adminToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"ACTIVE\",\n  \"reason\": \"Verification documentation approved\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/users/{{targetUserId}}/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "admin", "users", "{{targetUserId}}", "status"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Password Recovery Flow",
+			"item": [
+				{
+					"name": "Forgot Password [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response indicates success', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"});",
+									"",
+									"pm.test('Reset token is saved', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.resetToken).to.be.a('string');",
+									"    pm.environment.set('resetToken', jsonData.resetToken);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"customer@ecopartnerhub.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/forgot-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "forgot-password"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Message confirms password reset', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message.toLowerCase()).to.include('reset successfully');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"newPassword\": \"Customer@2026\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/reset-password",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "reset-password"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "7. Session Lifecycle",
+			"item": [
+				{
+					"name": "Re-login After Password Change [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Token saved to customerToken', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.token).to.be.a('string');",
+									"    pm.environment.set('customerToken', jsonData.token);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"customer@ecopartnerhub.com\",\n  \"password\": \"Customer@2026\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout [200]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Message confirms token invalidation', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message.toLowerCase()).to.include('invalidated');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "auth", "logout"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Access After Logout [401]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Status code is 401', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test('Error mentions revoked', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error.toLowerCase()).to.include('revoked');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{customerToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/user/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "user", "me"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
